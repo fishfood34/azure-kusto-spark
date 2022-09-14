@@ -321,8 +321,9 @@ object KustoWriter {
           blobWriter
         } else {
           KDSU.logInfo(myName, s"Sealing blob in partition ${TaskContext.getPartitionId} for requestId: '${writeOptions.requestId}', " +
-            s"blob number ${ingestionTasks.size}, with size $count")
+            s"blob number ${ingestionTasks.size}, with size $count with SAS ${blobWriter.sas}")
           finalizeBlobWrite(blobWriter)
+
           val task = ingest(blobWriter.blob, blobWriter.csvWriter.getCounter, blobWriter.sas, flushImmediately =
             true, writeOptions.isTransactionalMode, writeOptions.requestId)
           ingestionTasks.add(task)

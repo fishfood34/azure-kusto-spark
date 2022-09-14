@@ -57,6 +57,7 @@ object RowCSVWriterUtils {
       case ByteType | ShortType | IntegerType | LongType | FloatType | DoubleType =>
         writer.write(row.get(fieldIndexInRow, dataType).toString)
       case decimalType: DecimalType => writeDecimalField(row, fieldIndexInRow, decimalType.precision, decimalType.scale, writer)
+      case decimalType: DecimalType => writeDecimalField(row, fieldIndexInRow, DecimalType.SYSTEM_DEFAULT.precision, DecimalType.SYSTEM_DEFAULT.scale, writer)
       case _ => writer.writeStringField(row.get(fieldIndexInRow, dataType).toString)
     }
   }

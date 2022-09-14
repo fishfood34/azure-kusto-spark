@@ -17,6 +17,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterAll, FlatSpec}
 
+import java.math.MathContext
 import java.nio.file.{Files, Paths}
 import scala.collection.immutable
 import scala.util.Random
@@ -71,8 +72,8 @@ class KustoSourceE2E extends FlatSpec with BeforeAndAfterAll {
 
   def newRow(): String = s"row-${rowId.getAndIncrement()}"
   val random = new Random()
-  val maxBigDecimalSupported:BigDecimal = 12345678901234567890.123456789012345678
-  val minBigDecimalTest:BigDecimal = -12345678901234567890.123456789012345678
+  val maxBigDecimalTest:BigDecimal = BigDecimal("12345678901234567890.12345678901234567")
+  val minBigDecimalTest:BigDecimal = BigDecimal("-12345678901234567890.12345678901234567")
   val expectedNumberOfRows: Int = 100
   val rows: immutable.IndexedSeq[(String, Int,BigDecimal)] = (1 to expectedNumberOfRows).map(valueCol => {
     val nameCol = newRow()
@@ -80,7 +81,7 @@ class KustoSourceE2E extends FlatSpec with BeforeAndAfterAll {
       minBigDecimalTest
     }
     else if(valueCol == expectedNumberOfRows){
-      maxBigDecimalSupported
+      maxBigDecimalTest
     }else{
       BigDecimal.decimal(random.nextDouble() * (valueCol * 9999 - valueCol * 100) + valueCol * 100)
     }
@@ -90,9 +91,10 @@ class KustoSourceE2E extends FlatSpec with BeforeAndAfterAll {
 
   "KustoConnector" should "write to a kusto table and read it back in default mode"  in {
     // Create a new table.
-    KDSU.logInfo("e2e","running KustoConnector");
+    KDSU.logInfo("e2e","running KustoConnector decimal tests");
     val crp = new ClientRequestProperties
     crp.setTimeoutInMilliSec(2000)
+    dfOrig.show(100,false)
     dfOrig.write
       .format("com.microsoft.kusto.spark.datasource")
       .option(KustoSinkOptions.KUSTO_CLUSTER, kustoConnectionOptions.cluster)

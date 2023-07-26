@@ -15,7 +15,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.13.0</version>
+            <version>${fasterxml.jackson.databind.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>scala-library</artifactId>
@@ -74,6 +74,10 @@
                 <exclusion>
                     <artifactId>annotations</artifactId>
                     <groupId>org.jetbrains</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.minidev</groupId>
+                    <artifactId>json-smart</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -135,6 +139,12 @@
                     <groupId>com.azure</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <!-- Added to avoid ADB issue, ClassNotFoundException: net.minidev.json.JSONAware -->
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+            <version>${jsonsmart.version}</version>
         </dependency>
         <!--might need 3.2.0 here for local run query-->
         <dependency>
@@ -218,6 +228,13 @@
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
+        <!-- TODO Remove maven-artifact when moving to java 11 and use java.lang.module.ModuleDescriptor.Version -->
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-artifact</artifactId>
+            <version>3.8.7</version>
+        </dependency>
+
         <!-- Test Scope -->
         <dependency>
             <groupId>junit</groupId>
@@ -255,6 +272,13 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.dimafeng/testcontainers-scala-scalatest -->
+        <dependency>
+            <groupId>com.dimafeng</groupId>
+            <artifactId>testcontainers-scala-scalatest_2.12</artifactId>
+            <version>0.40.17</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -289,19 +313,26 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <javacArgs>
-                        <javacArg>-Xlint:unchecked</javacArg>
-                        <javacArg>-Xlint:deprecation</javacArg>
-                        <javacArg>-target</javacArg>
-                        <javacArg>11</javacArg>
-                    </javacArgs>
-                    <args>
-<!--                        <arg>-feature</arg>-->
-                        <arg>-unchecked</arg>
-                        <arg>-deprecation</arg>
-                    </args>
-
+                    <addScalacArgs>-target:jvm-1.8</addScalacArgs>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${mvn.failsafe.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>**/*KustoSinkE2ETests.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -421,7 +452,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
                 <configuration>
-                    <release>11</release>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>

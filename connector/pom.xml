@@ -676,7 +676,7 @@
 
                             <!-- When true, it will attempt to shade the contents of the java source files when creating the sources jar. -->
                             <shadeSourcesContent>true</shadeSourcesContent>
-                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
                     </execution>
                 </executions>

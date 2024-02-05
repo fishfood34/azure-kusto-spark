@@ -401,7 +401,8 @@ object KustoDataSourceUtils {
     try {
       writeModeParam = parameters.get(KustoSinkOptions.KUSTO_WRITE_MODE)
       writeMode =
-        if (writeModeParam.isEmpty) WriteMode.Transactional else WriteMode.withName(writeModeParam.get)
+        if (writeModeParam.isEmpty) WriteMode.Transactional
+        else WriteMode.withName(writeModeParam.get)
     } catch {
       case _: NoSuchElementException =>
         throw new InvalidParameterException(s"No such WriteMode option: '${writeModeParam.get}'")

@@ -8,6 +8,7 @@ import com.microsoft.azure.kusto.data.exceptions.KustoDataExceptionBase
 import com.microsoft.azure.kusto.ingest.resources.ResourceWithSas
 import com.microsoft.azure.kusto.ingest.{
   IngestClientFactory,
+  ManagedStreamingIngestClient,
   QueuedIngestClient,
   StreamingIngestClient
 }
@@ -53,8 +54,8 @@ class ExtendedKustoClient(
   // Reading process does not require ingest client to start working
   lazy val dmClient: Client = ClientFactory.createClient(ingestKcsb)
   lazy val ingestClient: QueuedIngestClient = IngestClientFactory.createClient(ingestKcsb)
-  lazy val streamingClient: StreamingIngestClient =
-    IngestClientFactory.createStreamingIngestClient(ingestKcsb)
+  lazy val streamingClient: ManagedStreamingIngestClient =
+    IngestClientFactory.createManagedStreamingIngestClient(ingestKcsb, engineKcsb)
   private lazy val ingestContainersContainerProvider =
     new ContainerProvider(this, clusterAlias, generateCreateTmpStorageCommand())
   private lazy val exportContainersContainerProvider =

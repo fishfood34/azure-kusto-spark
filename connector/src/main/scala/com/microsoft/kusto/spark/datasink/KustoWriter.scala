@@ -361,8 +361,8 @@ object KustoWriter {
 
     val timeZone = TimeZone.getTimeZone(parameters.writeOptions.timeZone).toZoneId
     val byteArrayOutputStream = new ByteArrayOutputStream()
-    // val compressedStream = new GZIPOutputStream(byteArrayOutputStream)
-    val streamWriter = new OutputStreamWriter(byteArrayOutputStream)
+    val compressedStream = new GZIPOutputStream(byteArrayOutputStream)
+    val streamWriter = new OutputStreamWriter(compressedStream)
     val writer = new BufferedWriter(streamWriter)
     val csvWriter = CountingWriter(writer)
     val totalSize = new AtomicLong(0)
@@ -374,6 +374,7 @@ object KustoWriter {
           className,
           s"Batch $batchIdForTracing exceeds the max streaming size 10MB compressed! " +
             s"Streaming ${csvWriter.getCounter} bytes from batch $batchIdForTracing. Index of the batch ($index).")
+        compressedStream.flush()
         writer.flush()
         streamBytesIntoKusto(
           batchIdForTracing,
@@ -388,9 +389,9 @@ object KustoWriter {
     // Close all resources
     writer.flush()
     writer.close()
-//    compressedStream.flush()
-//    compressedStream.finish()
-//    compressedStream.close()
+    compressedStream.flush()
+    compressedStream.finish()
+    compressedStream.close()
     byteArrayOutputStream.flush()
     byteArrayOutputStream.close()
 
@@ -418,7 +419,7 @@ object KustoWriter {
       ingestionProperties: IngestionProperties,
       streamingClient: ManagedStreamingIngestClient): Unit = {
     val streamSourceInfo = new StreamSourceInfo(new ByteArrayInputStream(bytes))
-    // streamSourceInfo.setCompressionType(CompressionType.gz)
+    streamSourceInfo.setCompressionType(CompressionType.gz)
     val status = streamingClient.ingestFromStream(streamSourceInfo, ingestionProperties)
 
     status.getIngestionStatusCollection.forEach(ingestionStatus => {
